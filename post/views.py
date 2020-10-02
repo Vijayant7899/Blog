@@ -47,6 +47,26 @@ def postComment(request):
 	return redirect(f"/post/{post.slug}")
 
 #to implement like/dislike on post
+def like_post(request):
+	user = request.user
+	if request.method == 'POST':
+		# post = Post.objects.all()
+		post_id = request.POST.get("post_id")
+		post_obj = Post.objects.get(sno=post_id)
+		if user in post_obj.likes.all():
+			post_obj.likes.remove(user)
+		else:
+			post_obj.likes.add(user)
+		like, created = Like.objects.get_or_create(user=user,post_id=post_id)
+
+		if not created:
+			if like.value == 'Like':
+				like.value = 'Unlike'
+			else:
+				like.value = 'Like'
+		like.save()
+
+	return redirect(f"/post/{post_obj.slug}")
 
 def delete_com(request):
 	user = request.user.id
